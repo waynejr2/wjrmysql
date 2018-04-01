@@ -1,0 +1,106 @@
+use wjr;
+table;
+
+
+DELIMITER $$
+
+DROP PROCEDURE IF EXISTS addc $$
+
+CREATE PROCEDURE addc()
+BEGIN
+	IF NOT EXISTS((SELECT * FROM information_schema.TABLES WHERE table_schema = 'wjr' AND table_name = 'customer';)) THEN
+		CREATE TABLE customer(n int);
+	END IF;
+END $$
+	
+CALL addc();
+DROP PROCEDURE IF EXISTS addc;
+
+DELIMITER ;
+
+
+((SELECT * FROM information_schema.columns WHERE table_schema=DATABASE() AND table_name='customers' AND column_name='email_address'))
+((SELECT * FROM information_schema.TABLES WHERE table_schema='wjr' AND table_name='customer'))
+
+
+
+DELIMITER $$
+
+DROP PROCEDURE IF EXISTS addc $$
+
+CREATE PROCEDURE addc()
+BEGIN
+	IF NOT EXISTS((SELECT * FROM information_schema.tables WHERE table_schema=DATABASE() AND table_name='customer')) THEN
+		CREATE TABLE customer(n int);
+	END IF;
+END $$
+	
+CALL addc() $$
+DROP PROCEDURE IF EXISTS addc $$
+
+DELIMITER ;
+
+
+
+DELIMITER $$
+
+DROP PROCEDURE IF EXISTS add_email_address_column_to_customers_table $$
+
+-- Create the stored procedure to perform the migration
+CREATE PROCEDURE add_email_address_column_to_customers_table()
+
+BEGIN
+  
+  -- Add the email_address column to the customers table, if it doesn't already exist
+  IF NOT EXISTS ((SELECT * FROM information_schema.columns WHERE table_schema=DATABASE() AND table_name='customers' AND column_name='email_address')) THEN
+    ALTER TABLE customers ADD email_address VARCHAR(256);
+  END IF;
+
+END $$
+
+-- Execute the stored procedure
+CALL add_email_address_column_to_customers_table() $$
+
+-- Don't forget to drop the stored procedure when you're done!
+DROP PROCEDURE IF EXISTS add_email_address_column_to_customers_table $$
+ 
+DELIMITER ;
+
+
+
+
+DELIMITER $$
+
+DROP PROCEDURE IF EXISTS add_email_address_column_to_customers_table $$
+
+-- Create the stored procedure to perform the migration
+CREATE PROCEDURE add_email_address_column_to_customers_table()
+
+BEGIN
+  
+  -- Add the email_address column to the customers table, if it doesn't already exist
+  IF NOT EXISTS ((SELECT * FROM information_schema.columns WHERE table_schema='wjr' AND table_name='customers' AND column_name='email_address')) THEN
+    ALTER TABLE customers ADD email_address VARCHAR(256);
+  END IF;
+
+END $$
+
+-- Execute the stored procedure
+CALL add_email_address_column_to_customers_table() $$
+
+-- Don't forget to drop the stored procedure when you're done!
+DROP PROCEDURE IF EXISTS add_email_address_column_to_customers_table $$
+ 
+DELIMITER ;
+
+
+
+
+
+
+
+
+
+
+
+

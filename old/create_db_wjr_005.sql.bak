@@ -1,0 +1,101 @@
+
+use wjr;
+
+DELIMITER $$
+
+DROP PROCEDURE IF EXISTS create_table_employees_audit $$
+
+CREATE PROCEDURE create_table_employees_audit()
+BEGIN
+	IF NOT EXISTS((SELECT * FROM information_schema.triggers WHERE table_schema='wjr' AND table_name='employees_audit' AND trigger_name='')) THEN
+		CREATE TABLE employees_audit(
+		id int auto_increment,
+		employeeNumber int,
+		lastName varchar(50),
+		changeDat DATETIME,
+		action varchar(50)
+		);
+	END IF;
+END $$
+	
+CALL create_table_employees_audit() $$
+DROP PROCEDURE IF EXISTS create_table_employees_audit $$
+
+DELIMITER ;
+
+
+DELIMITER $$
+CREATE PROCEDURE create_trigger_before_employee_insert()
+BEGIN
+	IF NOT EXISTS((SELECT * FROM information_schema.triggers where EVENT_OBJECT_TABLE='employees' and trigger_name='before_employee_update')) THEN
+		CREATE TRIGGER before_employee_update 
+			BEFORE UPDATE ON employees
+			FOR EACH ROW
+			BEGIN
+				INSERT INTO employees_audit
+				SET action = 'update',
+				employeeNumber = OLD.employeeNumber,
+				lastname = OLD.lastname,
+				changedat = NOW(); 
+			END$$
+	END IF;
+END $$
+
+CALL create_trigger_before_employee_insert() $$
+DELIMITER ;
+
+
+SELECT * FROM information_schema.triggers where trigger_name='before_employee_update'
+
+SELECT * FROM information_schema.triggers where EVENT_OBJECT_TABLE='employees' and trigger_name='before_employee_update';
+
+
+DELIMITER $$
+CREATE TRIGGER before_employee_update 
+    BEFORE UPDATE ON employees
+    FOR EACH ROW 
+BEGIN
+    INSERT INTO employees_audit
+    SET action = 'update',
+     	employeeNumber = OLD.employeeNumber,
+        lastname = OLD.lastname,
+        changedat = NOW(); 
+END$$
+DELIMITER ;
+
+
+DELIMITER $$
+CREATE TRIGGER before_employee_insert 
+    BEFORE INSERT ON employees
+    FOR EACH ROW 
+BEGIN
+    INSERT INTO employees_audit
+    SET action = 'insert',
+     	employeeNumber = NEW.employeeNumber,
+        lastname = NEW.lastname,
+        changedat = NOW(); 
+END$$
+DELIMITER ;
+
+
+
+insert into employees
+values
+	(100, 'Rasmussen', 'Wayne', '', 'wjr@wjr.com', 'xyz', 99, 'software developer');
+
+	
+update employees
+set jobTitle = 'Senior Software Developer'
+where employeeNumber = 100;
+
+
+
+		employeeNumber int,
+		lastName varchar(50),
+		firstName varchar(50),
+		extension varchar(10),
+		email varchar(100),
+		officeCode varchar(10),
+		reportsTo int,
+		jobTitle varchar(50)
+
